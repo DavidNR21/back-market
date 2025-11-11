@@ -39,6 +39,7 @@ class Cidades(BaseModel):
     active = BooleanField()
     nome = TextField()
     sufixo = TextField()
+    username = TextField()
     membros = IntegerField()
     status = TextField()
     limite = IntegerField()
