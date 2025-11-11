@@ -1,0 +1,52 @@
+from peewee import *
+import uuid
+
+
+db = PostgresqlDatabase('market',port=5432,user='postgres',password='123456')
+# coloque seu database já criado, user e senha
+
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+
+
+class Usuarios(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    active = BooleanField()
+    nome = TextField()
+    sobrenome = TextField()
+    username = TextField()
+    email = TextField()
+    senha = TextField()
+    nascimento = DateField()
+    cidade_Natal = TextField()
+    isVerified = BooleanField()
+    token = TextField()
+    role = TextField()
+    isPrivate = BooleanField()
+    banner = TextField()
+    foto = TextField()
+    bio = TextField()
+    blocos = TextField()
+    ipAddress = TextField()
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+
+
+
+class Cidades(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    active = BooleanField()
+    nome = TextField()
+    sufixo = TextField()
+    membros = IntegerField()
+    status = TextField()
+    limite = IntegerField()
+    logo = TextField()
+    banner = TextField()
+    bio = TextField()
+    url = TextField()
+
+
+
+db.create_tables([Usuarios, Cidades])
