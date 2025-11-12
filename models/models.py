@@ -33,7 +33,6 @@ class Usuarios(BaseModel):
     criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
 
-
 class Cidades(BaseModel):
     id = UUIDField(primary_key=True, default=uuid.uuid4)
     active = BooleanField()
@@ -45,9 +44,19 @@ class Cidades(BaseModel):
     limite = IntegerField()
     logo = TextField()
     banner = TextField()
+    posicao = AutoField()
     bio = TextField()
     url = TextField()
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+
+
+class Seguidores(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    seguidor = ForeignKeyField(Usuarios, backref='seguidores', on_delete='CASCADE')
+    seguido = ForeignKeyField(Usuarios, backref='seguidores', on_delete='CASCADE')
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+    # usuario A (quer seguir o B)--> A = seguidor e B = seguido / se for o contrario é so inverter
 
 
 
-db.create_tables([Usuarios, Cidades])
+db.create_tables([Usuarios, Cidades, Seguidores])

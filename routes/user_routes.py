@@ -30,9 +30,9 @@ def criarUser():
         data = request.get_json()
 
         required_fields = [
-            'active', 'nome', 'sobrenome', 'username', 'email', 'senha',
+            'nome', 'sobrenome', 'username', 'email', 'senha',
             'nascimento', 'cidade_Natal', 'isVerified', 'token', 'role',
-            'isPrivate', 'banner', 'foto', 'bio', 'blocos'
+            'isPrivate', 'banner', 'foto', 'bio'
         ]
 
         erros = []
@@ -44,11 +44,16 @@ def criarUser():
             return jsonify({'error': 'Campos ausentes', 'details': erros}), 400
         
         b = {}
+
+        query_username = Seguidores.select().where(Usuarios.username == data['username']).exists()
+        
+        if query_username:
+            return jsonify({'message': 'Username já usado', 'type' : "conflict"}), 200
         
         
         novo_usuario = Usuarios.create(
             # Dados principais
-            active = data['active'],
+            active = True,
             nome = data['nome'],
             sobrenome = data['sobrenome'],
             username = data['username'],
@@ -128,10 +133,6 @@ def updateUser(id):
 
         query.execute()
 
-        #user = Usuarios.get_by_id(id)
-
-        #user_dict = model_to_dict(user)
-
 
         response = {
             "message": f"Usuário com ID: {id} foi atualizado com sucesso.",
@@ -184,14 +185,12 @@ def update_active_User(id):
         return jsonify(error_message), 400
 
 
-@user_bp.route('/any/<string:id>', methods=['GET']) # verificado
-def readAnyUser(id):
+@user_bp.route('/any/<string:username>', methods=['GET']) # verificado
+def readAnyUser(username):
     try:
-        u = Usuarios.get_by_id(id)
-
+        u = Usuarios.select().where(Usuarios.username == username).get()
 
         user_dict = serialize_usuario(u)
-
 
         user_dict['id'] = str(user_dict['id'])
         if user_dict['nascimento']:
@@ -210,4 +209,119 @@ def readAnyUser(id):
         error_message = {"error": str(e)}
         return jsonify(error_message), 400
 
+
+############################################################################
+
+@user_bp.route('/busca/', methods=['GET']) # verificado
+def buscarUser():
+    try:
+        filter_field = request.args.get('filter', type=str)
+
+        if filter_field is not None:
+            query_contain = Usuarios.select()
+
+            column = filter_field.split('_')[0]
+            param = filter_field.split('_')[1]
+
+            search_field_attr = getattr(Usuarios, column)
+
+            print(column, param)
+    
+            user_contain = query_contain.where(search_field_attr.contains(param))
+
+            usuario_contain_dict = [model_to_dict(f) for f in user_contain]
+
+            response = {
+                "data" : usuario_contain_dict
+            }
+
+            return jsonify(response), 200
+        
+        response = {
+            "data" : []
+        }
+
+        return jsonify(response), 200
+
+
+    except Usuarios.DoesNotExist:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+    except Exception as e:
+        error_message = {"error": str(e)}
+        return jsonify(error_message), 400
+
+
+@user_bp.route('/seguir', methods=['POST']) # verificado
+def seguirUser():
+    try:
+        data = request.get_json()
+
+        if 'seguidor_id' not in data or 'seguido_username' not in data:
+            return jsonify({"error": "Faltando seguidor_id ou seguido_username"}), 400
+
+        seguidor_id_json = data['seguidor_id']
+        seguido_username = data['seguido_username']
+
+        try:
+            # .get() é um atalho para .select().where(...).get()
+            usuario_seguido = Usuarios.get(Usuarios.username == seguido_username)
+        except Usuarios.DoesNotExist:
+            return jsonify({"error": "Usuário a ser seguido não encontrado"}), 404
+
+        
+        ja_segue = Seguidores.select().where((Seguidores.seguidor == seguidor_id_json) & (Seguidores.seguido == usuario_seguido)).exists()
+
+
+        if ja_segue:
+            query = Seguidores.delete().where((Seguidores.seguidor == seguidor_id_json) & (Seguidores.seguido == usuario_seguido))
+
+            query.execute() 
+
+            return jsonify({"message": "Deixou de seguir com sucesso"}), 200
+
+        # 3. Se não existe, cria o relacionamento
+        Seguidores.create(
+            seguidor = seguidor_id_json,
+            seguido = usuario_seguido
+        )
+        
+        response = {
+            "message": "Seguindo com sucesso!"
+        }
+
+        return jsonify(response), 201
+
+    except Exception as e:
+        error_message = {"error": str(e)}
+        return jsonify(error_message), 500
+
+
+@user_bp.route('/geral/<string:username>', methods=['GET']) # verificado
+def readUserGeral(username):
+    try:
+        u = Usuarios.select().where((Usuarios.active == True) & (Usuarios.username == username)).get()
+
+
+        user_dict = serialize_usuario(u)
+
+
+        user_dict['id'] = str(user_dict['id'])
+        if user_dict['nascimento']:
+            user_dict['nascimento'] = user_dict['nascimento'].isoformat()
+
+        # Checagem de status
+        if user_dict['active'] == False:
+            return jsonify({'message': 'Usuário não está disponível'}), 404
+        
+        response = {
+            "data": user_dict
+        }
+
+        return jsonify(response), 200
+
+    except Usuarios.DoesNotExist:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+    except Exception as e:
+        error_message = {"error": str(e)}
+        return jsonify(error_message), 500
 
