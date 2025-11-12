@@ -44,8 +44,9 @@ class Cidades(BaseModel):
     limite = IntegerField()
     logo = TextField()
     banner = TextField()
-    posicao = AutoField()
     bio = TextField()
+    prefeito = TextField()
+    vereadores = TextField()
     url = TextField()
     criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
@@ -58,5 +59,11 @@ class Seguidores(BaseModel):
     # usuario A (quer seguir o B)--> A = seguidor e B = seguido / se for o contrario é so inverter
 
 
+class CidadesSeguidas(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    seguidor = ForeignKeyField(Usuarios, backref='cidadesseguidas', on_delete='CASCADE')
+    cidade_seguida = ForeignKeyField(Cidades, backref='cidadesseguidas', on_delete='CASCADE')
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
-db.create_tables([Usuarios, Cidades, Seguidores])
+
+db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas])
