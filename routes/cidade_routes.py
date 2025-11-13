@@ -79,7 +79,7 @@ def criarCidades():
         return jsonify({'error': f'Estrutura do JSON inválida, campo faltando: {str(e)}'}), 400
     except Exception as e:
         error_message = {"error": str(e)}
-        return jsonify(error_message), 400
+        return jsonify(error_message), 500
     
 
 @city_bp.route('/<string:id>', methods=['GET']) # verificado

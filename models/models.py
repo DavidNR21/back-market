@@ -66,4 +66,21 @@ class CidadesSeguidas(BaseModel):
     criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
 
-db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas])
+class Post(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    active = BooleanField()
+    content = TextField()
+    midia = TextField()
+    likes = IntegerField()
+    comentarios = IntegerField()
+    share = IntegerField()
+    views = IntegerField()
+    tag = TextField()
+    isVisible = BooleanField()
+    roles = TextField()
+    link = TextField()
+    usuario = ForeignKeyField(Usuarios, backref='post', on_delete='CASCADE')
+    cidade = ForeignKeyField(Cidades, backref='post', on_delete='CASCADE', null=True)
+    
+
+db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas, Post])
