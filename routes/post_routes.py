@@ -18,12 +18,12 @@ def getPost(username):
 
         print(posts_dict[0]['usuario'])
 
-        response = {
-            "count": contagem_de_posts,
-            "data": posts_dict 
-        }
+        #response = {
+            #"count": contagem_de_posts,
+            #"data": posts_dict 
+        #}
 
-        return jsonify(response), 200
+        return jsonify(posts_dict), 200
 
     except Exception as e:
         error_message = {"error": str(e)}
