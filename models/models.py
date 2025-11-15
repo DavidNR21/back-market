@@ -83,4 +83,12 @@ class Post(BaseModel):
     cidade = ForeignKeyField(Cidades, backref='post', on_delete='CASCADE', null=True)
     
 
-db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas, Post])
+class PostLikes(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    usuario = ForeignKeyField(Usuarios, backref='post_like', on_delete='CASCADE')
+    post = ForeignKeyField(Post, backref='post_like', on_delete='CASCADE')
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+
+
+
+db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas, Post, PostLikes])
