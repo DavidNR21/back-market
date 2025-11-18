@@ -256,3 +256,5 @@ def getPostGeral(post_id):
         print("Erro:", e)
         return jsonify(error_message), 500
     
+
+

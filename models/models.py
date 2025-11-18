@@ -71,10 +71,10 @@ class Post(BaseModel):
     active = BooleanField()
     content = TextField()
     midia = TextField()
-    likes = IntegerField()
-    comentarios = IntegerField()
-    share = IntegerField()
-    views = IntegerField()
+    likes = IntegerField(default=0)
+    comentarios = IntegerField(default=0)
+    share = IntegerField(default=0)
+    views = IntegerField(default=0)
     tag = TextField()
     isVisible = BooleanField()
     roles = TextField()
@@ -90,5 +90,22 @@ class PostLikes(BaseModel):
     criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
 
+class Comentarios(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    content = TextField()
+    midia = TextField()
+    likes = IntegerField(default=0)
+    type = TextField()
+    usuario = ForeignKeyField(Usuarios, backref='comentarios', on_delete='CASCADE')
+    post = ForeignKeyField(Post, backref='comentarios', on_delete='CASCADE')
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
-db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas, Post, PostLikes])
+
+class LikesComentarios(BaseModel):
+    id = UUIDField(primary_key=True, default=uuid.uuid4)
+    usuario = ForeignKeyField(Usuarios, backref='likes_comentario', on_delete='CASCADE')
+    comentario = ForeignKeyField(Comentarios, backref='likes_comentario', on_delete='CASCADE')
+    criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+
+
+db.create_tables([Usuarios, Cidades, Seguidores, CidadesSeguidas, Post, PostLikes, Comentarios, LikesComentarios])
