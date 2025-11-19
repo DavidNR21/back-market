@@ -72,7 +72,7 @@ class Post(BaseModel):
     content = TextField()
     midia = TextField()
     likes = IntegerField(default=0)
-    comentarios = IntegerField(default=0)
+    comentarios_count = IntegerField(default=0)
     share = IntegerField(default=0)
     views = IntegerField(default=0)
     tag = TextField()
@@ -98,6 +98,7 @@ class Comentarios(BaseModel):
     type = TextField()
     usuario = ForeignKeyField(Usuarios, backref='comentarios', on_delete='CASCADE')
     post = ForeignKeyField(Post, backref='comentarios', on_delete='CASCADE')
+    comentario_pai = UUIDField(null=True)
     criadoEm = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
 
